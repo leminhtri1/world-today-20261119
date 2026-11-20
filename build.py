@@ -361,6 +361,168 @@ def draw_summit(d, x, y, w, h):
         d.text((cx - tw / 2 + 8, table_y + 18), name, font=nf, fill=INK)
 
 
+# ---------------------------------------------------------------- story scenes (w x h panels)
+
+def _clip_panel(d, x, y, w, h, bg):
+    d.rectangle([x, y, x + w, y + h], fill=bg)
+
+
+def scene_hague(d, x, y, w, h):
+    _clip_panel(d, x, y, w, h, (214, 222, 230))
+    gy = y + h - 6
+    d.rectangle([x, gy, x + w, y + h], fill=(160, 150, 132))
+    bx0, bx1 = x + 14, x + w * 0.6
+    top = y + 22
+    d.polygon([(bx0 - 4, top), ((bx0 + bx1) / 2, y + 6), (bx1 + 4, top)], fill=(120, 110, 96))
+    d.rectangle([bx0 - 4, top, bx1 + 4, top + 5], fill=(98, 90, 78))
+    for i in range(6):
+        cx = bx0 + 4 + i * (bx1 - bx0 - 8) / 5
+        d.rectangle([cx - 3, top + 6, cx + 3, gy - 4], fill=(238, 234, 224))
+    d.rectangle([bx0 - 8, gy - 4, bx1 + 8, gy], fill=(98, 90, 78))
+    icon_scales(d, x + w - 60, y + 6, 52)
+
+
+def scene_ny(d, x, y, w, h):
+    _clip_panel(d, x, y, w, h, (26, 34, 54))
+    f = F(SANS_BOLD, 22)
+    d.text((x + 10, y + 6), "ANT", font=f, fill=WHITE)
+    d.text((x + 10, y + 34), "NASDAQ · DAY ONE", font=F(SANS_BOLD, 9), fill=(170, 180, 200))
+    pf = F(SANS_BOLD, 14)
+    d.rectangle([x + 66, y + 8, x + 66 + text_w(d, "IPO $83", pf) + 10, y + 27], fill=RED)
+    d.text((x + 71, y + 10), "IPO $83", font=pf, fill=WHITE)
+    base = y + h - 4
+    bars = [8, 13, 11, 18, 16, 25, 23, 34]
+    bw = 8
+    x0 = x + w - len(bars) * (bw + 3) - 8
+    pts = []
+    for i, b in enumerate(bars):
+        bx = x0 + i * (bw + 3)
+        d.rectangle([bx, base - b, bx + bw, base], fill=(70, 96, 140))
+        pts.append((bx + bw / 2, base - b - 6))
+    d.line(pts, fill=(255, 120, 110), width=3)
+    tx, ty = pts[-1]
+    d.polygon([(tx + 3, ty - 9), (tx - 7, ty - 3), (tx + 5, ty + 3)], fill=(255, 120, 110))
+
+
+def scene_kerch(d, x, y, w, h):
+    _clip_panel(d, x, y, w, h, (198, 208, 222))
+    wy = y + h * 0.62
+    d.rectangle([x, wy, x + w, y + h], fill=(108, 130, 162))
+    for i in range(0, int(w) - 18, 18):
+        d.arc([x + i, wy + 8, x + i + 18, wy + 14], 0, 180, fill=(150, 170, 196), width=1)
+    deck = y + h * 0.42
+    n = 6
+    for i in range(n):
+        ax = x + i * w / n
+        d.arc([ax, deck + 3, ax + w / n, deck + 3 + w / n * 0.8], 180, 360, fill=INK, width=3)
+        d.line([ax, deck + 5, ax, wy + 4], fill=INK, width=3)
+    d.rectangle([x, deck, x + w, deck + 5], fill=INK)
+    ex, ey = x + w * 0.62, deck - 2
+    for r, c, ox in ((16, (120, 120, 126), 12), (11, (150, 150, 156), 2)):
+        d.ellipse([ex - r + ox, y + 2, ex + r + ox, y + 2 + 2 * r], fill=c)
+    d.polygon(star(ex, ey, 17, 8), fill=(240, 140, 40))
+    d.polygon(star(ex, ey, 10, 5), fill=RED)
+
+
+def scene_riyadh(d, x, y, w, h):
+    _clip_panel(d, x, y, w, h, (236, 222, 198))
+    base = y + h
+    for bx, bw, bh in ((8, 22, 18), (34, 18, 28), (56, 26, 22), (w - 70, 20, 26), (w - 46, 28, 16), (w - 16, 14, 22)):
+        d.rectangle([x + bx, base - bh, x + bx + bw, base], fill=(150, 140, 126))
+    cx = x + w * 0.5
+    d.polygon([(cx - 14, base), (cx + 14, base), (cx + 8, y + 14), (cx - 8, y + 14)], fill=(52, 54, 62))
+    d.line([cx, y + 3, cx, y + 14], fill=(52, 54, 62), width=2)
+    for wy in range(int(y + 20), int(base - 4), 6):
+        d.line([cx - 6, wy, cx + 6, wy], fill=(110, 112, 120), width=1)
+    for i, r in enumerate((7, 9, 11)):
+        sx, sy = cx + 16 + i * 13, y + 16 - i * 4
+        d.ellipse([sx - r, sy - r, sx + r, sy + r], fill=(120, 116, 112))
+    d.polygon(star(cx + 9, y + 24, 12, 5), fill=RED)
+
+
+def scene_cop(d, x, y, w, h):
+    _clip_panel(d, x, y, w, h, (214, 230, 214))
+    gx, gy, r = x + 34, y + h / 2, 26
+    d.ellipse([gx - r, gy - r, gx + r, gy + r], fill=(118, 160, 196))
+    d.polygon([(gx - 14, gy - 18), (gx + 4, gy - 22), (gx + 10, gy - 6), (gx - 2, gy + 4), (gx - 16, gy - 4)], fill=(96, 150, 96))
+    d.polygon([(gx + 6, gy + 6), (gx + 18, gy + 10), (gx + 12, gy + 22), (gx + 2, gy + 16)], fill=(96, 150, 96))
+    px0 = x + 72
+    d.rectangle([px0, y + 6, x + w - 8, y + h - 6], fill=WHITE, outline=INK)
+    f = F(SANS_BOLD, 10)
+    d.text((px0 + 6, y + 9), "COP31 DRAFT · 19 NOV", font=f, fill=INK)
+    f2 = F(SANS_BOLD, 12)
+    for i, t in enumerate(("FOSSIL FUELS", "$120BN AID GOAL")):
+        ty = y + 25 + i * 16
+        d.text((px0 + 6, ty), t, font=f2, fill=(80, 80, 84))
+        d.line([px0 + 4, ty + 7, px0 + 8 + text_w(d, t, f2), ty + 7], fill=RED, width=2)
+
+
+def flag_dk(d, x, y, w, h):
+    d.rectangle([x, y, x + w, y + h], fill=(200, 16, 46))
+    d.rectangle([x + w * 0.33, y, x + w * 0.33 + h * 0.18, y + h], fill=WHITE)
+    d.rectangle([x, y + h * 0.41, x + w, y + h * 0.59], fill=WHITE)
+    d.rectangle([x, y, x + w, y + h], outline=INK, width=1)
+
+
+def flag_gl(d, x, y, w, h):
+    d.rectangle([x, y, x + w, y + h / 2], fill=WHITE)
+    d.rectangle([x, y + h / 2, x + w, y + h], fill=(208, 12, 51))
+    cx, cy, r = x + w * 0.38, y + h / 2, h * 0.33
+    d.pieslice([cx - r, cy - r, cx + r, cy + r], 180, 360, fill=(208, 12, 51))
+    d.pieslice([cx - r, cy - r, cx + r, cy + r], 0, 180, fill=WHITE)
+    d.rectangle([x, y, x + w, y + h], outline=INK, width=1)
+
+
+def scene_arctic(d, x, y, w, h):
+    _clip_panel(d, x, y, w, h, (222, 234, 242))
+    wy = y + h - 16
+    d.rectangle([x, wy, x + w, y + h], fill=(120, 150, 180))
+    d.polygon([(x + 10, wy), (x + 30, y + 22), (x + 44, y + 30), (x + 58, y + 12), (x + 78, wy)], fill=WHITE, outline=(120, 140, 160))
+    d.polygon([(x + 70, wy), (x + 88, y + 36), (x + 104, wy)], fill=(240, 246, 250), outline=(120, 140, 160))
+    fw, fh = 33, 22
+    fx = x + w - 3 * (fw + 5) - 2
+    for i, fn in enumerate((flag_dk, flag_gl, flag_us)):
+        fn(d, fx + i * (fw + 5), y + 10, fw, fh)
+
+
+def scene_bogota(d, x, y, w, h):
+    _clip_panel(d, x, y, w, h, (240, 226, 206))
+    base = y + h
+    d.rectangle([x + 6, base - 20, x + 42, base - 4], fill=(70, 74, 82))
+    d.rectangle([x + 30, base - 28, x + 42, base - 20], fill=(70, 74, 82))
+    for wx in (x + 12, x + 34):
+        d.ellipse([wx - 4, base - 8, wx + 4, base], fill=INK)
+    d.line([x + 36, base - 28, x + 46, base - 36], fill=INK, width=3)
+    for i in range(3):
+        d.arc([x + 44, base - 52 + i * 4, x + 96, base - 10 + i * 4], 200, 300, fill=(110, 160, 210), width=2)
+    for i in range(6):
+        cx = x + 104 + i * (w - 112) / 5.5
+        hy = base - 26 + (i % 2) * 3
+        if i % 2 == 0:
+            d.line([cx + 8, hy + 14, cx + 8, y + 14], fill=INK, width=2)
+            d.rectangle([cx - 4, y + 4, cx + 20, y + 16], fill=RED if i != 2 else (250, 200, 30))
+        d.ellipse([cx - 6, hy, cx + 6, hy + 12], fill=INK)
+        d.pieslice([cx - 11, hy + 13, cx + 11, hy + 37], 180, 360, fill=INK)
+
+
+def scene_gta(d, x, y, w, h):
+    _clip_panel(d, x, y, w, h, (44, 30, 66))
+    cx, cy = x + w * 0.5, y + h - 4
+    d.pieslice([cx - 30, cy - 30, cx + 30, cy + 30], 180, 360, fill=(250, 130, 90))
+    for i in range(3):
+        d.line([cx - 32, cy - 20 + i * 7, cx + 32, cy - 20 + i * 7], fill=(44, 30, 66), width=2)
+    d.rectangle([x, y + h - 6, x + w, y + h], fill=(30, 20, 46))
+    for px, hgt in ((x + 26, 44), (x + w - 34, 50)):
+        tx, ty = px + 6, y + h - hgt
+        d.line([px, y + h - 4, tx, ty], fill=(20, 12, 30), width=3)
+        for a in (200, 230, 310, 340):
+            ang = math.radians(a)
+            d.line([tx, ty, tx + 15 * math.cos(ang), ty - 15 * math.sin(ang) * -1 + 2], fill=(20, 12, 30), width=3)
+    f = F(SERIF_BOLD, 30)
+    d.text((x + w - 62, y + 2), "VI", font=f, fill=(255, 150, 200))
+    d.text((x + 10, y + 8), "OUT NOW", font=F(SANS_BOLD, 11), fill=WHITE)
+
+
 # ---------------------------------------------------------------- content
 # Lead = 1, cells = 2..9, briefs = 10.. ; region is for the region bar.
 # Every item happened or was first reported on Thursday 19 November 2026.
@@ -376,28 +538,28 @@ LEAD = dict(
 )
 
 CELLS = [
-    dict(n=2, region="EUROPE", where="THE HAGUE", ll=(4.3, 52.1), icon=icon_scales,
+    dict(n=2, region="EUROPE", where="THE HAGUE", ll=(4.3, 52.1), icon=scene_hague,
          head="World Court: Myanmar committed genocide against Rohingya",
          text="First such ICJ ruling against a state."),
-    dict(n=3, region="AMERICAS", where="NEW YORK", ll=(-74.0, 40.7), icon=icon_chart,
+    dict(n=3, region="AMERICAS", where="NEW YORK", ll=(-74.0, 40.7), icon=scene_ny,
          head="Anthropic debuts on Nasdaq at ~$1.5T valuation",
          text="Ticker ANT; IPO priced at $83, above the $70–78 range."),
-    dict(n=4, region="EUROPE", where="KERCH · KYIV", ll=(36.5, 45.3), icon=icon_bridge,
+    dict(n=4, region="EUROPE", where="KERCH · KYIV", ll=(36.5, 45.3), icon=scene_kerch,
          head="Ukraine hits Kerch Bridge again; strikes hit Kyiv embassies",
          text="Third strike in four days halts rail; Austrian, Dutch embassies damaged."),
-    dict(n=5, region="MIDEAST", where="RIYADH", ll=(46.7, 24.7), icon=icon_tower,
+    dict(n=5, region="MIDEAST", where="RIYADH", ll=(46.7, 24.7), icon=scene_riyadh,
          head="Houthi strike hits Riyadh's tallest tower",
          text="PIF Tower damaged as Iran war spreads; no casualties reported."),
-    dict(n=6, region="EUROPE", where="ANTALYA · COP31", ll=(30.7, 36.9), icon=icon_climate,
+    dict(n=6, region="EUROPE", where="ANTALYA · COP31", ll=(30.7, 36.9), icon=scene_cop,
          head="COP31 draft drops fossil fuels and $120bn aid goal",
          text="Talks in Turkey are due to end Friday; text not yet final."),
-    dict(n=7, region="EUROPE", where="COPENHAGEN", ll=(12.6, 55.7), icon=icon_arctic,
+    dict(n=7, region="EUROPE", where="COPENHAGEN", ll=(12.6, 55.7), icon=scene_arctic,
          head="Denmark approves Arctic security pact with Greenland & US",
          text="Covers the Arctic and North Atlantic."),
-    dict(n=8, region="AMERICAS", where="BOGOTÁ", ll=(-74.1, 4.6), icon=icon_protest,
+    dict(n=8, region="AMERICAS", where="BOGOTÁ", ll=(-74.1, 4.6), icon=scene_bogota,
          head="Mass protests in Colombia over taxes & cost of living",
          text="Second nationwide protest; police use water cannon."),
-    dict(n=9, region="GLOBAL", where="WORLDWIDE", ll=None, icon=icon_game,
+    dict(n=9, region="GLOBAL", where="WORLDWIDE", ll=None, icon=scene_gta,
          head="GTA VI finally goes on sale after two delays",
          text="Rockstar's game unlocks at midnight local time on PS5 and Xbox."),
 ]
@@ -508,7 +670,7 @@ def build(out):
     rt = f"ONE DAY'S WORLD NEWS  ·  {total} STORIES  ·  ALL FROM THIS ONE DAY"
     d.text((R - text_w(d, rt, kf), 14), rt, font=kf, fill=INK)
     d.line([L, 34, R, 34], fill=INK, width=2)
-    df = F(SERIF_BOLD, 74)
+    df = F(SERIF_BOLD, 70)
     while text_w(d, DATE_LONG, df) > inner:
         df = F(SERIF_BOLD, df.size - 2)
     d.text(((W - text_w(d, DATE_LONG, df)) / 2, 36), DATE_LONG, font=df, fill=INK)
@@ -517,14 +679,14 @@ def build(out):
            "COP31 draft drops fossil fuels")
     while text_w(d, sub, sf) > inner:
         sf = F(SERIF_ITALIC, sf.size - 1)
-    d.text(((W - text_w(d, sub, sf)) / 2, 122), sub, font=sf, fill=RED)
+    d.text(((W - text_w(d, sub, sf)) / 2, 114), sub, font=sf, fill=RED)
 
     # --- region bar
     counts = {}
     for it in [LEAD] + CELLS + BRIEFS:
         counts[it["region"]] = counts.get(it["region"], 0) + 1
     regs = [r for r in REGION_ORDER if counts.get(r)]
-    by = 150
+    by = 140
     rf = F(SANS_BOLD, 12)
     x = L
     min_w = {r: text_w(d, f"{r} {counts[r]}", rf) + 14 for r in regs}
@@ -537,8 +699,8 @@ def build(out):
         x += wdt + 3
 
     # --- lead
-    top = by + 32
-    ill_w, ill_h = 400, 184
+    top = by + 28
+    ill_w, ill_h = 400, 176
     draw_summit(d, L, top, ill_w, ill_h)
     tx = L + ill_w + 22
     twd = R - tx
@@ -566,7 +728,7 @@ def build(out):
     cw = inner / 4
     ch = (g_bot - g_top) / 2
     pad = 10
-    icon_s = 50
+    ph = 60
     for i, c in enumerate(CELLS):
         r, k = divmod(i, 4)
         cx, cy = L + k * cw, g_top + r * ch
@@ -578,9 +740,11 @@ def build(out):
         x1 = cx + cw - (pad if k < 3 else 0)
         wd = x1 - x0
         t = cy + 8
-        c["icon"](d, x0, t, icon_s)
-        num_tag(d, x0 + icon_s + 8, t + 14, c["n"], c["where"], max_w=wd - icon_s - 8)
-        hy = t + icon_s + 6
+        c["icon"](d, x0, t, wd, ph)
+        d.rectangle([x0, t + ph, x0 + wd, t + ph + 18], fill=INK)
+        marker(d, x0 + 10, t + ph + 9, c["n"])
+        d.text((x0 + 22, t + ph + 3), c["where"], font=F(SANS_BOLD, 12), fill=WHITE)
+        hy = t + ph + 24
         limit = cy + ch - 4
         dfnt, dl = fit(d, c["text"], SANS, wd, 2, 15, 12)
         d_h = 4 + len(dl) * line_h(dfnt, 1.22)
@@ -644,7 +808,7 @@ def build(out):
     srcf = foot_f
     while text_w(d, SOURCES, srcf) > inner - 34:
         srcf = F(SANS, srcf.size - 1)
-    d.text((cx0 + 22, foot_top + 25), SOURCES, font=srcf, fill=GREY)
+    d.text((cx0 + 22, foot_top + 23), SOURCES, font=srcf, fill=GREY)
     d.rectangle([0, H - 5, W, H], fill=RED)
 
     img.save(out, "PNG", optimize=True)
