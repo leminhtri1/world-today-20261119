@@ -42,6 +42,7 @@ SERIF_BOLD = font_path("georgiab.ttf")
 SERIF = font_path("georgia.ttf")
 SANS = font_path("arial.ttf")
 SANS_BOLD = font_path("arialbd.ttf")
+SERIF_ITALIC = font_path("georgiai.ttf")
 
 _cache = {}
 
@@ -306,16 +307,166 @@ SEAS = [
     [(47, 45), (50, 47), (53, 46.5), (53, 42), (54, 37.5), (50, 37), (49, 39.5), (47.5, 42.5)],
 ]
 
-# (label, [(lon, lat), ...], label anchor: 'r' right, 'l' left, 'a' above, 'b' below)
-PLACES = [
-    ("SHENZHEN", [(114.1, 22.5)], "b"),
-    ("THE HAGUE", [(4.3, 52.1)], "l"),
-    ("COPENHAGEN", [(12.6, 55.7)], "a"),
-    ("KYIV / KERCH", [(30.5, 50.4), (36.5, 45.3)], "r"),
-    ("RIYADH", [(46.7, 24.7)], "b"),
-    ("NEW YORK", [(-74.0, 40.7)], "r"),
-    ("BOGOTÁ", [(-74.1, 4.6)], "r"),
+# ---------------------------------------------------------------- extra icons
+
+def icon_climate(d, x, y, s):
+    cx, cy, r = x + s * 0.42, y + s * 0.55, s * 0.36
+    d.ellipse([cx - r, cy - r, cx + r, cy + r], outline=INK, width=3)
+    d.arc([cx - r * 0.45, cy - r, cx + r * 0.45, cy + r], 90, 270, fill=INK, width=2)
+    d.arc([cx - r * 0.45, cy - r, cx + r * 0.45, cy + r], 270, 90, fill=INK, width=2)
+    d.line([cx - r, cy, cx + r, cy], fill=INK, width=2)
+    # oil drop, struck through
+    dx, dy = x + s - 14, y + 14
+    d.polygon([(dx, dy - 12), (dx - 8, dy + 2), (dx + 8, dy + 2)], fill=RED)
+    d.ellipse([dx - 8, dy - 6, dx + 8, dy + 10], fill=RED)
+    d.line([dx - 12, dy + 12, dx + 12, dy - 12], fill=INK, width=3)
+
+
+def icon_game(d, x, y, s):
+    d.rounded_rectangle([x + 2, y + s * 0.3, x + s - 2, y + s * 0.82], radius=12, fill=INK)
+    cy = y + s * 0.56
+    d.rectangle([x + 11, cy - 2, x + 23, cy + 2], fill=PAPER)
+    d.rectangle([x + 15, cy - 6, x + 19, cy + 6], fill=PAPER)
+    d.ellipse([x + s - 18, cy - 8, x + s - 11, cy - 1], fill=RED)
+    d.ellipse([x + s - 26, cy + 1, x + s - 19, cy + 8], fill=PAPER)
+    f = F(SANS_BOLD, 14)
+    d.text((x + s / 2 - 8, y + 1), "VI", font=f, fill=RED)
+
+
+def draw_summit(d, x, y, w, h):
+    """Three leaders behind their flags at one table (drawn silhouettes)."""
+    d.rectangle([x, y, x + w, y + h], fill=(232, 228, 218))
+    band = 26
+    d.rectangle([x, y, x + w, y + band], fill=RED)
+    bf = F(SANS_BOLD, 14)
+    t = "APEC 2026  ·  SHENZHEN  ·  FIRST THREE-WAY SUMMIT"
+    d.text((x + (w - text_w(d, t, bf)) / 2, y + 5), t, font=bf, fill=WHITE)
+    names = (("TRUMP", flag_us), ("XI", flag_cn), ("PUTIN", flag_ru))
+    table_y = y + h - 46
+    fw, fh = 54, 36
+    for i, (name, fn) in enumerate(names):
+        cx = x + w * (i + 0.5) / 3
+        fn(d, cx - fw / 2, y + band + 8, fw, fh)
+        hr = 17
+        hy = table_y - 62
+        d.pieslice([cx - 40, hy + 26, cx + 40, hy + 106], 180, 360, fill=(52, 54, 62))
+        d.ellipse([cx - hr, hy - hr + 8, cx + hr, hy + hr + 8], fill=(52, 54, 62))
+    d.rectangle([x + 8, table_y, x + w - 8, table_y + 12], fill=(120, 86, 58))
+    d.rectangle([x + 8, table_y + 12, x + w - 8, y + h - 6], fill=(96, 68, 46))
+    nf = F(SANS_BOLD, 15)
+    for i, (name, _) in enumerate(names):
+        cx = x + w * (i + 0.5) / 3
+        tw = text_w(d, name, nf) + 16
+        d.rectangle([cx - tw / 2, table_y + 16, cx + tw / 2, table_y + 36], fill=WHITE, outline=INK)
+        d.text((cx - tw / 2 + 8, table_y + 18), name, font=nf, fill=INK)
+
+
+# ---------------------------------------------------------------- content
+# Lead = 1, cells = 2..9, briefs = 10.. ; region is for the region bar.
+# Every item happened or was first reported on Thursday 19 November 2026.
+
+DATE_LONG = "Thursday 19 November 2026"
+
+LEAD = dict(
+    n=1, region="ASIA", where="SHENZHEN · SUMMIT", ll=(114.1, 22.5),
+    head="Trump, Xi & Putin hold first-ever three-way summit",
+    text=("The US, Chinese and Russian leaders met on the sidelines of the APEC summit "
+          "in Shenzhen, China — their first trilateral meeting. "
+          "Trump left China without meeting Kim Jong-un."),
+)
+
+CELLS = [
+    dict(n=2, region="EUROPE", where="THE HAGUE", ll=(4.3, 52.1), icon=icon_scales,
+         head="World Court: Myanmar committed genocide against Rohingya",
+         text="First such ICJ ruling against a state."),
+    dict(n=3, region="AMERICAS", where="NEW YORK", ll=(-74.0, 40.7), icon=icon_chart,
+         head="Anthropic debuts on Nasdaq at ~$1.5T valuation",
+         text="Ticker ANT; IPO priced at $83, above the $70–78 range."),
+    dict(n=4, region="EUROPE", where="KERCH · KYIV", ll=(36.5, 45.3), icon=icon_bridge,
+         head="Ukraine hits Kerch Bridge again; strikes hit Kyiv embassies",
+         text="Third strike in four days halts rail; Austrian, Dutch embassies damaged."),
+    dict(n=5, region="MIDEAST", where="RIYADH", ll=(46.7, 24.7), icon=icon_tower,
+         head="Houthi strike hits Riyadh's tallest tower",
+         text="PIF Tower damaged as Iran war spreads; no casualties reported."),
+    dict(n=6, region="EUROPE", where="ANTALYA · COP31", ll=(30.7, 36.9), icon=icon_climate,
+         head="COP31 draft drops fossil fuels and $120bn aid goal",
+         text="Talks in Turkey are due to end Friday; text not yet final."),
+    dict(n=7, region="EUROPE", where="COPENHAGEN", ll=(12.6, 55.7), icon=icon_arctic,
+         head="Denmark approves Arctic security pact with Greenland & US",
+         text="Covers the Arctic and North Atlantic."),
+    dict(n=8, region="AMERICAS", where="BOGOTÁ", ll=(-74.1, 4.6), icon=icon_protest,
+         head="Mass protests in Colombia over taxes & cost of living",
+         text="Second nationwide protest; police use water cannon."),
+    dict(n=9, region="GLOBAL", where="WORLDWIDE", ll=None, icon=icon_game,
+         head="GTA VI finally goes on sale after two delays",
+         text="Rockstar's game unlocks at midnight local time on PS5 and Xbox."),
 ]
+
+BRIEFS = [
+    dict(n=10, region="ASIA", where="Seoul", ll=(127.0, 37.6), off=(0, 0),
+         text="Top court sends ex-PM Han Duck-soo's martial-law case back for retrial."),
+    dict(n=11, region="ASIA", where="Odisha", ll=(84.9, 19.3), off=(-9, 11),
+         text="Coast evacuated to shelters as Cyclone Akvan nears landfall."),
+    dict(n=12, region="OCEANIA", where="Canberra", ll=(149.1, -35.3), off=(0, 0),
+         text="Jobless rate jumps to 4.9%, highest since 2021."),
+    dict(n=13, region="EUROPE", where="Berlin", ll=(13.4, 52.5), off=(16, -11),
+         text="Merz rejects a “Yalta 2.0” for Ukraine at Coalition of the Willing talks."),
+    dict(n=14, region="EUROPE", where="Brussels", ll=(4.35, 50.85), off=(-20, 9),
+         text="EU deal delays methane rules for fuel importers by two years."),
+    dict(n=15, region="MIDEAST", where="Tehran", ll=(51.4, 35.7), off=(14, -7),
+         text="Iran calls chemical-weapons allegations “fraudulent”."),
+    dict(n=16, region="MIDEAST", where="Gaza", ll=(34.4, 31.4), off=(-6, 14),
+         text="Israel ends one-day Nuseirat raid."),
+    dict(n=17, region="ASIA", where="Ulaanbaatar", ll=(106.9, 47.9), off=(0, 0),
+         text="President Khürelsükh's resignation accepted."),
+    dict(n=18, region="ASIA", where="Bangladesh", ll=(91.8, 22.4), off=(7, -11),
+         text="Suspected arson at Muhammad Yunus's ancestral home."),
+    dict(n=19, region="AFRICA", where="Senegal", ll=(-17.4, 14.7), off=(0, 0),
+         text="Dozens missing after migrant boat capsizes."),
+    dict(n=20, region="AFRICA", where="Mogadishu", ll=(45.3, 2.0), off=(0, 0),
+         text="Somalia expels UAE ambassador."),
+    dict(n=21, region="AFRICA", where="Accra", ll=(-0.2, 5.6), off=(0, 0),
+         text="Ghana defends $61m presidential jet purchase."),
+    dict(n=22, region="AMERICAS", where="Florida", ll=(-80.2, 26.1), off=(0, 0),
+         text="Floods shut Broward and Miami-Dade schools."),
+    dict(n=23, region="AMERICAS", where="Brasília", ll=(-47.9, -15.8), off=(0, 0),
+         text="Senate passes fiscal package 69–2."),
+]
+
+MAP_OFFSETS = {1: (0, 0), 2: (-21, -12), 3: (0, 0), 4: (14, -8), 5: (0, 0), 6: (-16, 4),
+               7: (0, -17), 8: (0, 0)}
+
+SOURCES = ("Sources: Reuters, AP, AFP, Euronews, Al Jazeera, RTÉ, CBS Miami, ABS, "
+           "European Commission, Rockstar Games, Fortune, Morning Star, allAfrica, Rio Times")
+
+REGION_ORDER = ["ASIA", "EUROPE", "MIDEAST", "AFRICA", "AMERICAS", "OCEANIA", "GLOBAL"]
+
+
+# ---------------------------------------------------------------- map (numbered)
+
+MAP_W, MAP_H = 330, 188
+LON0, LON1, LAT0, LAT1 = -108.0, 158.0, -42.0, 72.0
+
+LANDS += [
+    [(166.5, -46), (172.5, -40.5), (174.5, -36.5), (178.5, -37.5), (176, -41.5), (169, -46.5)],
+    [(144.6, -40.7), (148.3, -40.9), (147.8, -43.2), (145.2, -42.6)],
+    [(-72, -50), (-68, -55), (-66, -55), (-69, -52)],
+]
+
+
+def _y(lat):
+    return (_merc(LAT1) - _merc(lat)) / (_merc(LAT1) - _merc(LAT0)) * MAP_H
+
+
+def proj(lon, lat):
+    return ((lon - LON0) / (LON1 - LON0) * MAP_W, _y(lat))
+
+
+def marker(md, x, y, n, r=7):
+    md.ellipse([x - r, y - r, x + r, y + r], fill=RED, outline=WHITE, width=1)
+    f = F(SANS_BOLD, 9 if n < 10 else 8)
+    s = str(n)
+    md.text((x - md.textlength(s, font=f) / 2, y - 5), s, font=f, fill=WHITE)
 
 
 def draw_map():
@@ -325,65 +476,20 @@ def draw_map():
         md.polygon([proj(*p) for p in poly], fill=LAND)
     for poly in SEAS:
         md.polygon([proj(*p) for p in poly], fill=SEA)
-    lf = F(SANS_BOLD, 11)
-    for label, pts, side in PLACES:
-        xy = [proj(*p) for p in pts]
-        for (x, y) in xy:
-            md.ellipse([x - 4, y - 4, x + 4, y + 4], fill=RED, outline=WHITE, width=1)
-        x, y = xy[0]
-        tw = md.textlength(label, font=lf)
-        if side == "r":
-            x2 = max(px for px, _ in xy)
-            tx, ty = x2 + 7, y - 7
-        elif side == "l":
-            tx, ty = x - 7 - tw, y - 7
-        elif side == "a":
-            tx, ty = x - tw / 2, y - 20
-        else:
-            tx, ty = x - tw / 2, y + 6
-        tx = min(max(tx, 2), MAP_W - 2 - tw)
-        md.text((tx, ty), label, font=lf, fill=INK)
+    pts = [(LEAD["n"], LEAD["ll"], (0, 0))]
+    pts += [(c["n"], c["ll"], MAP_OFFSETS.get(c["n"], (0, 0))) for c in CELLS if c["ll"]]
+    pts += [(b["n"], b["ll"], b["off"]) for b in BRIEFS]
+    # true positions first, then leaders, then numbered markers on top
+    for n, (lon, lat), (ox, oy) in pts:
+        x, y = proj(lon, lat)
+        if ox or oy:
+            md.line([x, y, x + ox, y + oy], fill=INK, width=1)
+            md.ellipse([x - 2, y - 2, x + 2, y + 2], fill=INK)
+    for n, (lon, lat), (ox, oy) in pts:
+        x, y = proj(lon, lat)
+        x, y = min(max(x + ox, 8), MAP_W - 8), min(max(y + oy, 8), MAP_H - 8)
+        marker(md, x, y, n)
     return m
-
-
-# ---------------------------------------------------------------- content
-
-DATE = "THURSDAY 19 NOVEMBER 2026"
-
-LEAD_KICKER = "SHENZHEN, CHINA  ·  APEC SUMMIT"
-LEAD_HEAD = "Trump, Xi & Putin hold first-ever three-way summit in Shenzhen"
-LEAD_SUM = ("The US, Chinese and Russian leaders met on the sidelines of the APEC summit "
-            "in Shenzhen, China — their first trilateral meeting. "
-            "Trump left China without meeting Kim Jong-un.")
-
-STORIES = [
-    ("THE HAGUE", icon_scales,
-     "World Court: Myanmar committed genocide against Rohingya",
-     "First such ICJ ruling against a state."),
-    ("NEW YORK", icon_chart,
-     "Anthropic debuts on Nasdaq at ~$1.5T valuation",
-     "Ticker ANT; IPO priced at $83, above the $70–78 range."),
-    ("UKRAINE", icon_bridge,
-     "Ukraine hits Kerch Bridge again; Russian strikes damage embassies in Kyiv",
-     "Third strike in four days halts rail traffic; Austrian and Dutch embassies damaged."),
-    ("RIYADH", icon_tower,
-     "Houthi strike hits Riyadh's tallest tower",
-     "Public Investment Fund Tower damaged as Iran war spreads; no casualties reported."),
-    ("COPENHAGEN", icon_arctic,
-     "Denmark approves Arctic security pact with Greenland & US",
-     "Deal strengthens security in the Arctic and North Atlantic."),
-    ("BOGOTÁ", icon_protest,
-     "Mass protests in Colombia over taxes & cost of living",
-     "Second nationwide protest; police use water cannon."),
-]
-
-TICKER = [
-    "Mongolia: President Khürelsükh's resignation accepted",
-    "Senegal: dozens missing after migrant boat capsizes",
-    "Somalia expels UAE ambassador",
-    "Bangladesh: suspected arson at Muhammad Yunus's ancestral home",
-    "Gaza: Israel ends one-day Nuseirat raid",
-]
 
 
 # ---------------------------------------------------------------- page
@@ -392,144 +498,185 @@ def build(out):
     img = Image.new("RGB", (W, H), PAPER)
     d = ImageDraw.Draw(img)
     inner = W - 2 * MARGIN
+    L, R = MARGIN, W - MARGIN
 
-    # Masthead
-    d.rectangle([0, 0, W, 8], fill=RED)
-    title_f = F(SERIF_BOLD, 64)
-    title = "THE WORLD TODAY"
-    tw = text_w(d, title, title_f)
-    d.text(((W - tw) / 2, 18), title, font=title_f, fill=INK)
-    y = 96
-    d.line([MARGIN, y, W - MARGIN, y], fill=INK, width=3)
-    date_f = F(SANS_BOLD, 17)
-    d.text((MARGIN, y + 8), DATE, font=date_f, fill=INK)
-    tag = "ONE DAY'S WORLD NEWS"
-    d.text((W - MARGIN - text_w(d, tag, date_f), y + 8), tag, font=date_f, fill=RED)
-    y += 34
-    d.line([MARGIN, y, W - MARGIN, y], fill=INK, width=1)
+    # --- masthead: the date is the headline
+    d.rectangle([0, 0, W, 6], fill=RED)
+    kf = F(SANS_BOLD, 14)
+    d.text((L, 14), "THE WORLD TODAY", font=kf, fill=RED)
+    total = 1 + len(CELLS) + len(BRIEFS)
+    rt = f"ONE DAY'S WORLD NEWS  ·  {total} STORIES  ·  ALL FROM THIS ONE DAY"
+    d.text((R - text_w(d, rt, kf), 14), rt, font=kf, fill=INK)
+    d.line([L, 34, R, 34], fill=INK, width=2)
+    df = F(SERIF_BOLD, 74)
+    while text_w(d, DATE_LONG, df) > inner:
+        df = F(SERIF_BOLD, df.size - 2)
+    d.text(((W - text_w(d, DATE_LONG, df)) / 2, 36), DATE_LONG, font=df, fill=INK)
+    sf = F(SERIF_ITALIC, 18)
+    sub = ("Three leaders at one table in Shenzhen · The World Court rules on Myanmar · "
+           "COP31 draft drops fossil fuels")
+    while text_w(d, sub, sf) > inner:
+        sf = F(SERIF_ITALIC, sf.size - 1)
+    d.text(((W - text_w(d, sub, sf)) / 2, 122), sub, font=sf, fill=RED)
 
-    # Lead story (about 40% of the page incl. masthead)
-    lead_top = y + 14
-    panel_x = W - MARGIN - MAP_W
-    text_wd = panel_x - 24 - MARGIN
+    # --- region bar
+    counts = {}
+    for it in [LEAD] + CELLS + BRIEFS:
+        counts[it["region"]] = counts.get(it["region"], 0) + 1
+    regs = [r for r in REGION_ORDER if counts.get(r)]
+    by = 150
+    rf = F(SANS_BOLD, 12)
+    x = L
+    min_w = {r: text_w(d, f"{r} {counts[r]}", rf) + 14 for r in regs}
+    spare = inner - sum(min_w.values()) - 3 * (len(regs) - 1)
+    for i, r in enumerate(regs):
+        wdt = min_w[r] + spare * counts[r] / total
+        d.rectangle([x, by, x + wdt, by + 20], fill=RED if i % 2 == 0 else INK)
+        lab = f"{r} {counts[r]}"
+        d.text((x + (wdt - text_w(d, lab, rf)) / 2, by + 3), lab, font=rf, fill=WHITE)
+        x += wdt + 3
 
-    kick_f = F(SANS_BOLD, 15)
-    d.rectangle([MARGIN, lead_top, MARGIN + text_w(d, LEAD_KICKER, kick_f) + 16, lead_top + 24], fill=RED)
-    d.text((MARGIN + 8, lead_top + 4), LEAD_KICKER, font=kick_f, fill=WHITE)
+    # --- lead
+    top = by + 32
+    ill_w, ill_h = 400, 184
+    draw_summit(d, L, top, ill_w, ill_h)
+    tx = L + ill_w + 22
+    twd = R - tx
+    num_tag(d, tx, top, LEAD["n"], LEAD["where"])
+    hf, hl = fit(d, LEAD["head"], SERIF_BOLD, twd, 3, 36, 26)
+    ty = draw_lines(d, tx, top + 26, hl, hf, INK, lead=1.1)
+    sf2, sl = fit(d, LEAD["text"], SERIF, twd, 4, 17, 14)
+    ty = draw_lines(d, tx, ty + 6, sl, sf2, DETAIL, lead=1.3)
+    lead_bottom = max(top + ill_h, ty) + 12
+    d.line([L, lead_bottom, R, lead_bottom], fill=INK, width=3)
 
-    head_f, head_lines = fit(d, LEAD_HEAD, SERIF_BOLD, text_wd, 3, 42, 34)
-    ty = draw_lines(d, MARGIN, lead_top + 34, head_lines, head_f, INK, lead=1.12)
+    # --- footer (date check), measured first
+    foot_f = F(SANS, 12)
+    check = ("DATE CHECK  Every story on this page happened, or was first reported, on "
+             "Thursday 19 November 2026.")
+    foot_h = 40
+    foot_top = H - 14 - foot_h
 
-    # three small flags in a row under the headline
-    fx, fy = MARGIN, ty + 4
-    flag_w, flag_h = 48, 32
-    lab_f = F(SANS_BOLD, 13)
-    for label, fn in (("USA", flag_us), ("CHINA", flag_cn), ("RUSSIA", flag_ru)):
-        fn(d, fx, fy, flag_w, flag_h)
-        d.text((fx + flag_w + 8, fy + flag_h / 2 - 8), label, font=lab_f, fill=INK)
-        fx += flag_w + 8 + text_w(d, label, lab_f) + 22
-    ty = fy + flag_h + 8
+    # --- bottom band: map + numbered briefs
+    band_h = MAP_H + 26
+    band_top = foot_top - 10 - band_h
 
-    sum_f, sum_lines = fit(d, LEAD_SUM, SERIF, text_wd, 4, 18, 15)
-    ty = draw_lines(d, MARGIN, ty, sum_lines, sum_f, GREY, lead=1.32)
-
-    # world map panel on the right
-    cap_f = F(SANS_BOLD, 12)
-    cap = "WHERE THE NEWS HAPPENED"
-    map_y = max(lead_top + 22, (lead_top + ty) / 2 - MAP_H / 2 + 6)  # centred on the lead column
-    d.text((panel_x, map_y - 20), cap, font=cap_f, fill=RED)
-    img.paste(draw_map(), (int(panel_x), int(map_y)))
-    d.rectangle([panel_x, map_y, panel_x + MAP_W - 1, map_y + MAP_H - 1], outline=RULE, width=1)
-    map_bottom = map_y + MAP_H
-    d.line([panel_x - 12, lead_top, panel_x - 12, max(ty, map_bottom)], fill=RULE, width=1)
-
-    lead_bottom = max(ty, map_bottom) + 10
-    d.line([MARGIN, lead_bottom, W - MARGIN, lead_bottom], fill=INK, width=3)
-
-    # Ticker geometry first, so the grid can take what is left
-    label = "IN BRIEF"
-    lab_w = text_w(d, label, F(SANS_BOLD, 15)) + 24
-    tick_wd = inner - lab_w - 24
-    for size in range(18, 12, -1):
-        tick_f = F(SANS, size)
-        tick_lines = wrap_items(d, TICKER, tick_f, tick_wd)
-        if len(tick_lines) <= 3:
-            break
-    TICK_LEAD = 1.5
-    tick_h = len(tick_lines) * line_h(tick_f, TICK_LEAD) + 16
-    tick_top = H - 20 - tick_h  # bottom margin below the strip
-
-    # 2 x 3 grid
-    grid_top = lead_bottom + 2
-    grid_bot = tick_top - 10
-    cell_w = inner / 3
-    cell_h = (grid_bot - grid_top) / 2
-    pad = 12
-    icon_s = 60
-    place_f = F(SANS_BOLD, 17)
-    for i, (place, icon, head, detail) in enumerate(STORIES):
-        r, c = divmod(i, 3)
-        cx = MARGIN + c * cell_w
-        cy = grid_top + r * cell_h
-        if c:
-            d.line([cx, cy + 10, cx, cy + cell_h - 10], fill=RULE, width=1)
+    # --- 4 x 2 grid of stories between lead and band
+    g_top, g_bot = lead_bottom + 2, band_top - 10
+    cw = inner / 4
+    ch = (g_bot - g_top) / 2
+    pad = 10
+    icon_s = 50
+    for i, c in enumerate(CELLS):
+        r, k = divmod(i, 4)
+        cx, cy = L + k * cw, g_top + r * ch
+        if k:
+            d.line([cx, cy + 8, cx, cy + ch - 8], fill=RULE, width=1)
         if r:
-            d.line([cx + (0 if c == 0 else 10), cy, cx + cell_w - (0 if c == 2 else 10), cy], fill=RULE, width=1)
-        x0 = cx + (pad if c else 0)
-        x1 = cx + cell_w - (pad if c < 2 else 0)
+            d.line([cx + (0 if k == 0 else 8), cy, cx + cw - (0 if k == 3 else 8), cy], fill=RULE, width=1)
+        x0 = cx + (pad if k else 0)
+        x1 = cx + cw - (pad if k < 3 else 0)
         wd = x1 - x0
-        top = cy + pad
-        icon(d, x0, top, icon_s)
-        d.text((x0 + icon_s + 12, top + 14), place, font=place_f, fill=RED)
-        d.line([x0 + icon_s + 12, top + 37, x0 + icon_s + 12 + 40, top + 37], fill=RED, width=2)
-        hy = top + icon_s + 8
-        limit = cy + cell_h - 6
-        df, dl = fit(d, detail, SANS, wd, 3, 17, 14)
-        d_h = 6 + len(dl) * line_h(df, 1.25)
-        for hsize in range(24, 16, -1):  # largest headline that leaves room for the detail
-            hf, hl = fit(d, head, SERIF_BOLD, wd, 3, hsize, 16)
-            if hy + len(hl) * line_h(hf, 1.12) + d_h <= limit:
+        t = cy + 8
+        c["icon"](d, x0, t, icon_s)
+        num_tag(d, x0 + icon_s + 8, t + 14, c["n"], c["where"], max_w=wd - icon_s - 8)
+        hy = t + icon_s + 6
+        limit = cy + ch - 4
+        dfnt, dl = fit(d, c["text"], SANS, wd, 2, 15, 12)
+        d_h = 4 + len(dl) * line_h(dfnt, 1.22)
+        for hs in range(21, 14, -1):
+            hfn, hln = fit(d, c["head"], SERIF_BOLD, wd, 3, hs, 14)
+            if hy + len(hln) * line_h(hfn, 1.12) + d_h <= limit:
                 break
-        hy = draw_lines(d, x0, hy, hl, hf, INK, lead=1.12)
-        end = draw_lines(d, x0, hy + 6, dl, df, DETAIL, lead=1.25)
-        assert end <= limit + 2, f"cell overflow: {place} ({end:.0f} > {limit:.0f})"
+        hy = draw_lines(d, x0, hy, hln, hfn, INK, lead=1.12)
+        end = draw_lines(d, x0, hy + 4, dl, dfnt, DETAIL, lead=1.22)
+        assert end <= limit + 2, f"cell overflow: {c['where']} ({end:.0f} > {limit:.0f})"
 
-    # Ticker strip
-    d.rectangle([MARGIN, tick_top, W - MARGIN, tick_top + tick_h], fill=INK)
-    d.rectangle([MARGIN, tick_top, MARGIN + lab_w, tick_top + tick_h], fill=RED)
-    lf = F(SANS_BOLD, 15)
-    d.text((MARGIN + 12, tick_top + tick_h / 2 - 9), label, font=lf, fill=WHITE)
-    lh = line_h(tick_f, TICK_LEAD)
-    draw_lines(d, MARGIN + lab_w + 14, tick_top + 8 + (lh - tick_f.size) / 2 - 2,
-               tick_lines, tick_f, WHITE, lead=TICK_LEAD)
-    d.rectangle([0, H - 4, W, H], fill=RED)
+    # --- map
+    d.line([L, band_top - 4, R, band_top - 4], fill=INK, width=2)
+    cap = F(SANS_BOLD, 12)
+    d.text((L, band_top + 2), "WHERE IT HAPPENED", font=cap, fill=RED)
+    d.text((L + text_w(d, "WHERE IT HAPPENED  ", cap), band_top + 3),
+           "numbers match the stories", font=F(SERIF_ITALIC, 11), fill=GREY)
+    my = band_top + 22
+    img.paste(draw_map(), (int(L), int(my)))
+    d.rectangle([L, my, L + MAP_W - 1, my + MAP_H - 1], outline=RULE, width=1)
+
+    # --- briefs, two columns
+    bx = L + MAP_W + 18
+    d.text((bx, band_top + 2), "ALSO ON THURSDAY 19 NOVEMBER 2026", font=cap, fill=RED)
+    colw = (R - bx - 16) / 2
+    for size in range(14, 10, -1):
+        bf, bbf = F(SANS, size), F(SANS_BOLD, size)
+        hts = [len(brief_lines(d, b, bbf, bf, colw - 22)) * line_h(bf, 1.2) + 4 for b in BRIEFS]
+        half = min(range(1, len(BRIEFS)), key=lambda k: max(sum(hts[:k]), sum(hts[k:])))
+        layouts, ok = [], True
+        for col in (BRIEFS[:half], BRIEFS[half:]):
+            yy = band_top + 24
+            rows = []
+            for b in col:
+                lines = brief_lines(d, b, bbf, bf, colw - 22)
+                rows.append((b, lines, yy))
+                yy += len(lines) * line_h(bf, 1.2) + 4
+            ok = ok and yy <= band_top + band_h + 2
+            layouts.append(rows)
+        if ok:
+            break
+    for ci, rows in enumerate(layouts):
+        x0 = bx + ci * (colw + 16)
+        for b, lines, yy in rows:
+            marker(d, x0 + 8, yy + bf.size / 2 + 1, b["n"])
+            for li, ln in enumerate(lines):
+                ly = yy + li * line_h(bf, 1.2)
+                if li == 0:
+                    d.text((x0 + 20, ly), b["where"], font=bbf, fill=INK)
+                    off = text_w(d, b["where"] + " ", bbf)
+                    d.text((x0 + 20 + off, ly), ln, font=bf, fill=DETAIL)
+                else:
+                    d.text((x0 + 20, ly), ln, font=bf, fill=DETAIL)
+
+    # --- footer
+    d.rectangle([L, foot_top, R, foot_top + foot_h], outline=RED, width=2)
+    cx0, cy0 = L + 12, foot_top + 10
+    d.line([cx0, cy0 + 6, cx0 + 5, cy0 + 11, cx0 + 14, cy0], fill=RED, width=3)
+    cf = F(SANS_BOLD, 12)
+    d.text((cx0 + 22, foot_top + 7), check, font=cf, fill=INK)
+    srcf = foot_f
+    while text_w(d, SOURCES, srcf) > inner - 34:
+        srcf = F(SANS, srcf.size - 1)
+    d.text((cx0 + 22, foot_top + 25), SOURCES, font=srcf, fill=GREY)
+    d.rectangle([0, H - 5, W, H], fill=RED)
 
     img.save(out, "PNG", optimize=True)
     return os.path.getsize(out)
 
 
-def wrap_items(d, items, font, width):
-    """Pack whole ticker items onto lines, separated by bullets."""
-    sep = "  •  "
-    lines, cur = [], ""
-    for item in items:
-        trial = item if not cur else cur + sep + item
-        if text_w(d, trial, font) <= width:
-            cur = trial
+def num_tag(d, x, y, n, where, max_w=None):
+    marker(d, x + 8, y + 8, n, r=8)
+    f = F(SANS_BOLD, 13)
+    while max_w and text_w(d, where, f) > max_w - 22 and f.size > 9:
+        f = F(SANS_BOLD, f.size - 1)
+    d.text((x + 21, y + 1), where, font=f, fill=RED)
+
+
+def brief_lines(d, b, bold, reg, width):
+    """Wrap a brief whose first line starts after the bold place name."""
+    lead_w = text_w(d, b["where"] + " ", bold)
+    words, lines, cur, avail = b["text"].split(), [], "", width - lead_w
+    for w in words:
+        t = w if not cur else cur + " " + w
+        if text_w(d, t, reg) <= avail:
+            cur = t
         else:
-            if cur:
-                lines.append(cur)
-            cur = item
-            if text_w(d, item, font) > width:
-                return [""] * 99  # item alone too wide: caller tries a smaller size
-    if cur:
-        lines.append(cur)
+            lines.append(cur)
+            cur, avail = w, width
+    lines.append(cur)
     return lines
 
 
 if __name__ == "__main__":
     here = os.path.dirname(os.path.abspath(__file__))
-    out = os.path.join(here, "entry.png")
+    out = sys.argv[1] if len(sys.argv) > 1 else os.path.join(here, "entry.png")
     size = build(out)
     assert size <= 1048576, size
     print(f"wrote {out} ({size} bytes)")
