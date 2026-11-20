@@ -1,6 +1,10 @@
 # The World Today: 19 November 2026
 
-An entry for make.fun's bounty *Sum up 19 November's world news in one image*
+[![make.fun · news-image-20261119](https://make.fun/badge/news-image-20261119.svg)](https://make.fun/bounty/news-image-20261119?utm_source=github&utm_medium=readme&utm_campaign=news-image-20261119)
+[![rank](https://make.fun/badge/news-image-20261119/leminhtri1/world-today-20261119/rank.svg)](https://make.fun/bounty/news-image-20261119/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=news-image-20261119)
+[![reward](https://make.fun/badge/news-image-20261119/leminhtri1/world-today-20261119/reward.svg)](https://make.fun/bounty/news-image-20261119?utm_source=github&utm_medium=readme&utm_campaign=news-image-20261119)
+
+An entry for make.fun's bounty [ *Sum up 19 November's world news in one image*](https://make.fun/bounty/news-image-20261119)
 (`news-image-20261119`).
 
 - `build.py` draws `entry.png` (1024×1024) with Pillow: masthead, lead story with
